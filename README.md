@@ -1,86 +1,82 @@
-# DevSecOps Pipeline Implementation for Tic Tac Toe Game
+# Kubernetes Deployment for Tic Tac Toe
 
-## Features
+This directory contains Kubernetes manifests for deploying the Tic Tac Toe application.
 
-- 🎮 Fully functional Tic Tac Toe game
-- 📊 Score tracking for X, O, and draws
-- 📜 Game history with timestamps
-- 🏆 Highlights winning combinations
-- 🔄 Reset game and statistics
-- 📱 Responsive design for all devices
+## Components
 
-## Technologies Used
+1. **Deployment** - Manages the application pods with scaling and update strategies
+2. **Service** - Exposes the application within the cluster
+3. **Ingress** - Exposes the application to external traffic
 
-- React 18
-- TypeScript
-- Tailwind CSS
-- Lucide React for icons
+## Prerequisites
 
-## Project Structure
+- Kubernetes cluster (e.g., Minikube, EKS, GKE, AKS)
+- kubectl configured to communicate with your cluster
+- Container registry access (GitHub Container Registry in this case)
 
-```
-src/
-├── components/
-│   ├── Board.tsx       # Game board component
-│   ├── Square.tsx      # Individual square component
-│   ├── ScoreBoard.tsx  # Score tracking component
-│   └── GameHistory.tsx # Game history component
-├── utils/
-│   └── gameLogic.ts    # Game logic utilities
-├── App.tsx             # Main application component
-└── main.tsx           # Entry point
-```
+## Setup Container Registry Secret
 
-## Game Logic
-
-The game implements the following rules:
-
-1. X goes first, followed by O
-2. The first player to get 3 of their marks in a row (horizontally, vertically, or diagonally) wins
-3. If all 9 squares are filled and no player has 3 marks in a row, the game is a draw
-4. Winning combinations are highlighted
-5. Game statistics are tracked and displayed
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js (v14 or higher)
-- npm or yarn
-
-### Installation
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/devsecops-demo.git
-   cd devsecops-demo
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   # or
-   yarn
-   ```
-
-3. Start the development server:
-   ```bash
-   npm run dev
-   # or
-   yarn dev
-   ```
-
-4. Open your browser and navigate to `http://localhost:5173`
-
-## Building for Production
-
-To create a production build:
+Before deploying, you need to create a secret for pulling images from GitHub Container Registry:
 
 ```bash
-npm run build
-# or
-yarn build
+kubectl create secret docker-registry github-container-registry \
+  --docker-server=ghcr.io \
+  --docker-username=YOUR_GITHUB_USERNAME \
+  --docker-password=YOUR_GITHUB_TOKEN \
+  --docker-email=YOUR_EMAIL
 ```
 
-The build artifacts will be stored in the `dist/` directory.
+Replace the placeholders with your actual GitHub credentials.
 
+## Deployment
+
+To deploy the application:
+
+```bash
+kubectl apply -f kubernetes/deployment.yaml
+kubectl apply -f kubernetes/service.yaml
+kubectl apply -f kubernetes/ingress.yaml
+```
+
+## Accessing the Application
+
+If you're using Minikube:
+
+```bash
+minikube service tic-tac-toe --url
+```
+
+If you've set up the Ingress with a domain, access it at the configured domain (e.g., tic-tac-toe.example.com).
+
+## Scaling
+
+To scale the application:
+
+```bash
+kubectl scale deployment tic-tac-toe --replicas=5
+```
+
+## Updating
+
+When a new image is pushed to the registry, update the deployment:
+
+```bash
+kubectl rollout restart deployment tic-tac-toe
+```
+
+## Monitoring
+
+Check deployment status:
+
+```bash
+kubectl get deployments
+kubectl get pods
+kubectl get services
+kubectl get ingress
+```
+
+View logs:
+
+```bash
+kubectl logs -l app=tic-tac-toe
+```
